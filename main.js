@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TransformControls } from "three/addons/controls/TransformControls.js";
 import * as Helper from "./helperFunctions.js";
 
 /*********************
@@ -22,8 +23,8 @@ const gridHelper = new THREE.GridHelper(5);
 scene.add(axesHelper);
 scene.add(gridHelper);
 
-camera.position.y = 7;
-camera.position.z = 4;
+camera.position.y = 6;
+camera.position.z = 0;
 
 //renderer setup
 const renderer = new THREE.WebGLRenderer();
@@ -32,11 +33,10 @@ renderer.setClearColor("#c8c8c8");
 document.body.appendChild(renderer.domElement);
 
 //lights
-const light = new THREE.AmbientLight(0x404040);
+const light = new THREE.DirectionalLight(0xffffff, 0.5);
 scene.add(light);
-light.position.set(0, 0, 0);
 
-//Table
+//Table ####################################################################################################
 const tableGeometry = new THREE.BoxGeometry(8, 4, 4);
 const tableMaterial = new THREE.MeshBasicMaterial({
   color: 0x652365,
@@ -47,29 +47,46 @@ table.position.set(0, 0.5, 0);
 
 scene.add(table);
 
-//turntable Base
+//TURNTABLE ####################################################################################################
 const turnTableGeometry = new THREE.BoxGeometry(4, 0.2, 2.5);
 const turnTableMaterial = new THREE.MeshNormalMaterial({
   side: THREE.DoubleSide,
+  wireframe: false,
 });
 const turnTable = new THREE.Mesh(turnTableGeometry, turnTableMaterial);
 turnTable.position.set(0, 2.6, 0);
 
 scene.add(turnTable);
 
-//turntable Plate
+//PLATE ####################################################################################################
 const plateGeometry = new THREE.CylinderGeometry(1.1, 1.2, 0.2);
 const plateMaterial = new THREE.MeshBasicMaterial({
   color: 0xd4d8d8,
   reflectivity: 1,
 });
-
 const plate = new THREE.Mesh(plateGeometry, plateMaterial);
-plate.position.set(-0.5, 2.7, 0);
+plate.position.set(-0.5, 0.04, 0);
 
-scene.add(plate);
+turnTable.add(plate);
 
-//Vinyl object
+//COVER ####################################################################################################
+const coverPivot = new THREE.Group();
+turnTable.add(coverPivot);
+
+coverPivot.position.set(-0.5, 0, -1.2);
+const coverGroup = new THREE.Group();
+
+const coverGeo = new THREE.BoxGeometry(1, 1, 0.05);
+const coverMat = new THREE.MeshNormalMaterial({
+  side: THREE.DoubleSide,
+  flatShading: true,
+});
+const coverMain = new THREE.Mesh(coverGeo, coverMat);
+
+coverPivot.add(coverGroup);
+coverGroup.position.y = 0.5;
+
+//Vinyl  ####################################################################################################
 const vinylTexture = textLoader.load(`./src/vinylCover.png`);
 vinylTexture.colorSpace = THREE.SRGBColorSpace;
 
@@ -87,14 +104,27 @@ vinyl.position.set(-0.5, 2.85, 0);
 
 scene.add(vinyl);
 
-//obitControls
-const controls = new OrbitControls(camera, renderer.domElement);
+//obitControls ####################################################################################################
+const control = new OrbitControls(camera, renderer.domElement);
+/* const controls = new TransformControls(camera, renderer.domElement);
+controls.setMode("rotate");
+
+controls.showX = false;
+controls.showZ = false;
+
+controls.size = 1.9;
+
+console.log(controls.getHelper());
+
+controls.attach(vinyl);
+scene.add(controls.getHelper());
+console.log(controls); */
 
 renderer.setAnimationLoop(animate);
 
 function animate() {
   renderer.render(scene, camera);
-  //vinyl.rotation.z += 0.02;
+  vinyl.rotation.z += 0.02;
 }
 
 //teste funçoes
@@ -104,3 +134,15 @@ window.addEventListener("wheel", function (e) {
   console.log(delta);
   /* Helper.teste(); */
 });
+
+function animatecube() {
+  if (coverPivot.rotation.x < Math.PI / 2) {
+    coverPivot.rotation.x += 0.075;
+  }
+
+  window.requestAnimationFrame(animatecube);
+}
+
+/* window.addEventListener("click", () => {
+  animatecube();
+}); */

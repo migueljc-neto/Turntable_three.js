@@ -23,8 +23,9 @@ const gridHelper = new THREE.GridHelper(5);
 scene.add(axesHelper);
 scene.add(gridHelper);
 
-camera.position.y = 6;
-camera.position.z = 0;
+camera.position.y = 5;
+camera.position.z = 2;
+camera.rotation.x = -Math.PI / 3;
 
 //renderer setup
 const renderer = new THREE.WebGLRenderer();
@@ -40,7 +41,7 @@ scene.add(light);
 const tableGeometry = new THREE.BoxGeometry(8, 4, 4);
 const tableMaterial = new THREE.MeshBasicMaterial({
   color: 0x652365,
-  wireframe: true,
+  wireframe: false,
 });
 const table = new THREE.Mesh(tableGeometry, tableMaterial);
 table.position.set(0, 0.5, 0);
@@ -105,7 +106,6 @@ vinyl.position.set(-0.5, 2.85, 0);
 scene.add(vinyl);
 
 //obitControls ####################################################################################################
-const control = new OrbitControls(camera, renderer.domElement);
 /* const controls = new TransformControls(camera, renderer.domElement);
 controls.setMode("rotate");
 
@@ -118,8 +118,8 @@ console.log(controls.getHelper());
 
 controls.attach(vinyl);
 scene.add(controls.getHelper());
-console.log(controls); */
-
+console.log(controls);
+ */
 renderer.setAnimationLoop(animate);
 
 function animate() {

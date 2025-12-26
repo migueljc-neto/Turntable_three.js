@@ -23,8 +23,9 @@ const gridHelper = new THREE.GridHelper(5);
 scene.add(axesHelper);
 scene.add(gridHelper);
 
-camera.position.y = 5;
+camera.position.y = 6;
 camera.position.z = 2;
+camera.position.x = 0;
 camera.rotation.x = -Math.PI / 3;
 
 //renderer setup
@@ -33,15 +34,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor("#c8c8c8");
 document.body.appendChild(renderer.domElement);
 
-//lights
-const light = new THREE.DirectionalLight(0xffffff, 0.5);
-scene.add(light);
-
 //Table ####################################################################################################
 const tableGeometry = new THREE.BoxGeometry(8, 4, 4);
 const tableMaterial = new THREE.MeshBasicMaterial({
   color: 0x652365,
-  wireframe: false,
+  wireframe: true,
 });
 const table = new THREE.Mesh(tableGeometry, tableMaterial);
 table.position.set(0, 0.5, 0);
@@ -49,7 +46,7 @@ table.position.set(0, 0.5, 0);
 scene.add(table);
 
 //TURNTABLE ####################################################################################################
-const turnTableGeometry = new THREE.BoxGeometry(4, 0.2, 2.5);
+const turnTableGeometry = new THREE.BoxGeometry(5, 0.2, 2.5);
 const turnTableMaterial = new THREE.MeshNormalMaterial({
   side: THREE.DoubleSide,
   wireframe: false,
@@ -59,6 +56,51 @@ turnTable.position.set(0, 2.6, 0);
 
 scene.add(turnTable);
 
+//BUTTON ####################################################################################################
+const buttonGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+const buttonMat = new THREE.MeshNormalMaterial();
+
+// PLAY BUTTON
+const playButton = new THREE.Mesh(buttonGeo, buttonMat, "playB");
+turnTable.add(playButton);
+playButton.position.set(0.7, 0.1, 0.9);
+
+// PAUSE BUTTON
+const pauseButton = new THREE.Mesh(buttonGeo, buttonMat, "pauseB");
+turnTable.add(pauseButton);
+pauseButton.position.set(1.1, 0.1, 0.9);
+
+// RESET BUTTON
+const resetButton = new THREE.Mesh(buttonGeo, buttonMat, "resetB");
+turnTable.add(resetButton);
+resetButton.position.set(1.5, 0.1, 0.9);
+
+//SLIDERS ####################################################################################################
+const sliderGeo = new THREE.BoxGeometry(0.3, 0.2, 1);
+const sliderMat = new THREE.MeshNormalMaterial();
+
+// VOLUME SLIDER
+const volumeSlider = new THREE.Mesh(sliderGeo, sliderMat, "volumeS");
+turnTable.add(volumeSlider);
+volumeSlider.position.set(0.8, 0.04, 0);
+
+// RATE SLIDER
+const rateSlider = new THREE.Mesh(sliderGeo, sliderMat, "rateS");
+turnTable.add(rateSlider);
+rateSlider.position.set(1.4, 0.04, 0);
+
+//SLIDERS NOBS ####################################################################################################
+const nobGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 32);
+const nobMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+const volumeNob = new THREE.Mesh(nobGeo, nobMat);
+volumeSlider.add(volumeNob);
+volumeNob.position.set(0, 0.05, 0);
+
+const rateNob = new THREE.Mesh(nobGeo, nobMat);
+rateSlider.add(rateNob);
+rateNob.position.set(0, 0.05, 0);
+
 //PLATE ####################################################################################################
 const plateGeometry = new THREE.CylinderGeometry(1.1, 1.2, 0.2);
 const plateMaterial = new THREE.MeshBasicMaterial({
@@ -66,26 +108,37 @@ const plateMaterial = new THREE.MeshBasicMaterial({
   reflectivity: 1,
 });
 const plate = new THREE.Mesh(plateGeometry, plateMaterial);
-plate.position.set(-0.5, 0.04, 0);
+plate.position.set(-1, 0.04, 0);
 
 turnTable.add(plate);
 
-//COVER ####################################################################################################
-const coverPivot = new THREE.Group();
-turnTable.add(coverPivot);
+//NEEDLE ####################################################################################################
+const needlePivot = new THREE.Group();
+turnTable.add(needlePivot);
+needlePivot.position.set(-2.2, 0.3, -1);
 
-coverPivot.position.set(-0.5, 0, -1.2);
-const coverGroup = new THREE.Group();
+const points = [
+  new THREE.Vector3(0, -0.5, 0),
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(0.9, 0, 0),
+];
 
-const coverGeo = new THREE.BoxGeometry(1, 1, 0.05);
-const coverMat = new THREE.MeshNormalMaterial({
-  side: THREE.DoubleSide,
-  flatShading: true,
-});
-const coverMain = new THREE.Mesh(coverGeo, coverMat);
+const path = new THREE.CatmullRomCurve3(points);
 
-coverPivot.add(coverGroup);
-coverGroup.position.y = 0.5;
+const tubeGeo = new THREE.TubeGeometry(path, 64, 0.05, 20, false);
+const tubeMat = new THREE.MeshStandardMaterial({ color: 0x2194ce });
+const tubeObj = new THREE.Mesh(tubeGeo, tubeMat);
+
+needlePivot.add(tubeObj);
+needlePivot.rotation.y = -1.6;
+
+const needleGeo = new THREE.SphereGeometry(0.08, 32);
+const needleMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const needleObj = new THREE.Mesh(needleGeo, needleMat);
+
+needlePivot.add(needleObj);
+
+needleObj.position.set(0.85, 0, 0);
 
 //Vinyl  ####################################################################################################
 const vinylTexture = textLoader.load(`./src/vinylCover.png`);
@@ -101,7 +154,7 @@ const vinyl = new THREE.Mesh(vinylGeometry, vinylMaterial);
 
 vinyl.rotation.x = Math.PI / 2;
 vinyl.rotation.z = Math.PI;
-vinyl.position.set(-0.5, 2.85, 0);
+vinyl.position.set(-1, 2.85, 0);
 
 scene.add(vinyl);
 
@@ -122,9 +175,19 @@ console.log(controls);
  */
 renderer.setAnimationLoop(animate);
 
+let setPlateRotation = false;
+const testButton = document.getElementById("buttonPlay");
+
+testButton.addEventListener("click", function () {
+  setPlateRotation = !setPlateRotation;
+});
+
 function animate() {
+  if (setPlateRotation) {
+    testObj.rotation.y += 0.01;
+  }
+
   renderer.render(scene, camera);
-  vinyl.rotation.z += 0.02;
 }
 
 //teste funçoes

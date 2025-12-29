@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import * as Helper from "./helperFunctions.js";
+import * as Audio from "./audio.js";
 
 /*********************
  * SCENE
@@ -61,36 +62,45 @@ const buttonGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
 const buttonMat = new THREE.MeshNormalMaterial();
 
 // PLAY BUTTON
-const playButton = new THREE.Mesh(buttonGeo, buttonMat, "playB");
+const playButton = new THREE.Mesh(buttonGeo, buttonMat);
 turnTable.add(playButton);
+playButton.name = "playB";
 playButton.position.set(0.7, 0.1, 0.9);
 
 // PAUSE BUTTON
-const pauseButton = new THREE.Mesh(buttonGeo, buttonMat, "pauseB");
+const pauseButton = new THREE.Mesh(buttonGeo, buttonMat);
 turnTable.add(pauseButton);
+pauseButton.name = "pauseB";
 pauseButton.position.set(1.1, 0.1, 0.9);
 
 // RESET BUTTON
-const resetButton = new THREE.Mesh(buttonGeo, buttonMat, "resetB");
+const resetButton = new THREE.Mesh(buttonGeo, buttonMat);
 turnTable.add(resetButton);
+resetButton.name = "resetB";
 resetButton.position.set(1.5, 0.1, 0.9);
 
 //SLIDERS ####################################################################################################
 const sliderGeo = new THREE.BoxGeometry(0.3, 0.2, 1);
 const sliderMat = new THREE.MeshNormalMaterial();
 
+const sliders = new THREE.Group();
+turnTable.add(sliders);
+sliders.position.set(1.4, 0.1, 0);
+
 // VOLUME SLIDER
-const volumeSlider = new THREE.Mesh(sliderGeo, sliderMat, "volumeS");
-turnTable.add(volumeSlider);
-volumeSlider.position.set(0.8, 0.04, 0);
+const volumeSlider = new THREE.Mesh(sliderGeo, sliderMat);
+sliders.add(volumeSlider);
+volumeSlider.name = "volumeS";
+volumeSlider.position.set(-0.5, 0, 0);
 
 // RATE SLIDER
-const rateSlider = new THREE.Mesh(sliderGeo, sliderMat, "rateS");
-turnTable.add(rateSlider);
-rateSlider.position.set(1.4, 0.04, 0);
+const rateSlider = new THREE.Mesh(sliderGeo, sliderMat);
+sliders.add(rateSlider);
+rateSlider.name = "rateS";
+rateSlider.position.set(0, 0, 0);
 
 //SLIDERS NOBS ####################################################################################################
-const nobGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 32);
+const nobGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.2, 32);
 const nobMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
 const volumeNob = new THREE.Mesh(nobGeo, nobMat);
@@ -173,18 +183,80 @@ controls.attach(vinyl);
 scene.add(controls.getHelper());
 console.log(controls);
  */
+
+let needleTarget = -0.8;
+let needleReached = false;
+let isPlaying = false;
+let audioPaused = false;
+let resetTrackFlag = false;
+
 renderer.setAnimationLoop(animate);
 
-let setPlateRotation = false;
-const testButton = document.getElementById("buttonPlay");
+const raycaster = new THREE.Raycaster();
 
-testButton.addEventListener("click", function () {
-  setPlateRotation = !setPlateRotation;
-});
+document.addEventListener("click", onWheelEvent);
+
+function onWheelEvent(event) {
+  const coords = new THREE.Vector2(
+    (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
+    -((event.clientY / renderer.domElement.clientHeight) * 2 - 1)
+  );
+
+  raycaster.setFromCamera(coords, camera);
+
+  const intersections = raycaster.intersectObjects(scene.children, true);
+
+  if (intersections.length > 0) {
+    const selectedObject = intersections[0].object;
+
+    if (selectedObject.name === "playB") isPlaying = true;
+    if (selectedObject.name === "pauseB") isPlaying = false;
+    if (selectedObject.name === "resetB") resetTrack();
+  }
+}
+
+function resetTrack() {
+  isPlaying = false;
+  resetTrackFlag = true;
+  console.log(resetTrackFlag);
+}
 
 function animate() {
-  if (setPlateRotation) {
-    testObj.rotation.y += 0.01;
+  if (isPlaying) {
+    if (needlePivot.rotation.y < needleTarget) {
+      needlePivot.rotation.y += 0.02;
+    } else {
+      if (!needleReached) {
+        Audio.playAudio();
+        audioPaused = false;
+
+        needleReached = true;
+        needleTarget = -1.6;
+      }
+      vinyl.rotation.z += 0.02;
+    }
+  }
+
+  if (!isPlaying) {
+    if (!audioPaused) {
+      Audio.pauseAudio();
+      audioPaused = true;
+    }
+
+    if (needlePivot.rotation.y > needleTarget) {
+      needlePivot.rotation.y -= 0.02;
+    } else {
+      needleReached = false;
+
+      needleTarget = -0.8;
+    }
+
+    if (!needleReached && resetTrackFlag) {
+      if (vinyl.rotation.z.toFixed(2) > Math.PI) {
+        vinyl.rotation.z -= 0.12;
+        console.log(vinyl.rotation.z.toFixed(2));
+      }
+    }
   }
 
   renderer.render(scene, camera);
@@ -194,18 +266,4 @@ function animate() {
 
 window.addEventListener("wheel", function (e) {
   const delta = e.deltaY;
-  console.log(delta);
-  /* Helper.teste(); */
 });
-
-function animatecube() {
-  if (coverPivot.rotation.x < Math.PI / 2) {
-    coverPivot.rotation.x += 0.075;
-  }
-
-  window.requestAnimationFrame(animatecube);
-}
-
-/* window.addEventListener("click", () => {
-  animatecube();
-}); */

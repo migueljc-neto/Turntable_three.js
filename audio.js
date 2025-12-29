@@ -8,17 +8,17 @@ export let audio1 = new Audio(
   "./src/Injury Reserve - Jailbreak the Tesla (Feat. Aminé).mp3"
 );
 
-playButton.addEventListener("click", playAudio);
+//playButton.addEventListener("click", playAudio);
 pauseButton.addEventListener("click", pauseAudio);
 timeButton.addEventListener("click", getTime);
 resetButton.addEventListener("click", resetTime);
 slowButton.addEventListener("click", slowAudio);
 
-function playAudio() {
+export function playAudio() {
   console.log("play audio");
   audio1.play();
 }
-function pauseAudio() {
+export function pauseAudio() {
   console.log("pause audio");
   audio1.pause();
 }

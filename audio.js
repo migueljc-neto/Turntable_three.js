@@ -27,10 +27,8 @@ function getTime() {
   console.log(audio1.currentTime);
 }
 
-function resetTime() {
-  audio1.pause();
+export function resetTime() {
   audio1.currentTime = 0;
-  console.log(audio1.currentTime);
 }
 
 function slowAudio() {

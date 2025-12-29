@@ -39,7 +39,7 @@ document.body.appendChild(renderer.domElement);
 const tableGeometry = new THREE.BoxGeometry(8, 4, 4);
 const tableMaterial = new THREE.MeshBasicMaterial({
   color: 0x652365,
-  wireframe: true,
+  wireframe: false,
 });
 const table = new THREE.Mesh(tableGeometry, tableMaterial);
 table.position.set(0, 0.5, 0);
@@ -125,10 +125,10 @@ turnTable.add(plate);
 //NEEDLE ####################################################################################################
 const needlePivot = new THREE.Group();
 turnTable.add(needlePivot);
-needlePivot.position.set(-2.2, 0.3, -1);
+needlePivot.position.set(-2.2, 0.2, -1);
 
 const points = [
-  new THREE.Vector3(0, -0.5, 0),
+  new THREE.Vector3(0, -0.3, 0),
   new THREE.Vector3(0, 0, 0),
   new THREE.Vector3(0.9, 0, 0),
 ];
@@ -164,25 +164,14 @@ const vinyl = new THREE.Mesh(vinylGeometry, vinylMaterial);
 
 vinyl.rotation.x = Math.PI / 2;
 vinyl.rotation.z = Math.PI;
-vinyl.position.set(-1, 2.85, 0);
+vinyl.position.set(-1, 0.145, 0);
 
-scene.add(vinyl);
+turnTable.add(vinyl);
 
 //obitControls ####################################################################################################
-/* const controls = new TransformControls(camera, renderer.domElement);
-controls.setMode("rotate");
+/* const controls = new OrbitControls(camera, renderer.domElement);
 
-controls.showX = false;
-controls.showZ = false;
-
-controls.size = 1.9;
-
-console.log(controls.getHelper());
-
-controls.attach(vinyl);
-scene.add(controls.getHelper());
-console.log(controls);
- */
+scene.add(controls); */
 
 let needleTarget = -0.8;
 let needleReached = false;
@@ -218,10 +207,13 @@ function onWheelEvent(event) {
 function resetTrack() {
   isPlaying = false;
   resetTrackFlag = true;
+  Audio.resetTime();
   console.log(resetTrackFlag);
 }
 
 function animate() {
+  if (vinyl.rotation.z > 3 * Math.PI) vinyl.rotation.z = Math.PI;
+
   if (isPlaying) {
     if (needlePivot.rotation.y < needleTarget) {
       needlePivot.rotation.y += 0.02;
@@ -252,9 +244,10 @@ function animate() {
     }
 
     if (!needleReached && resetTrackFlag) {
-      if (vinyl.rotation.z.toFixed(2) > Math.PI) {
-        vinyl.rotation.z -= 0.12;
-        console.log(vinyl.rotation.z.toFixed(2));
+      if (vinyl.rotation.z.toFixed(4) > Math.PI.toFixed(4)) {
+        vinyl.rotation.z -= 0.08;
+      } else {
+        resetTrackFlag = false;
       }
     }
   }

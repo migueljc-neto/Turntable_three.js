@@ -1,13 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TransformControls } from "three/addons/controls/TransformControls.js";
+import { DragControls } from "three/addons/controls/DragControls.js";
 import * as Helper from "./helperFunctions.js";
 import * as Audio from "./audio.js";
 
-/*********************
- * SCENE
- * *******************/
-// create an empty scene, that will hold all our elements such as objects, cameras and lights
+//SCENE ####################################################################################################
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -32,7 +29,7 @@ camera.rotation.x = -Math.PI / 3;
 //renderer setup
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor("#c8c8c8");
+renderer.setClearColor("#000000ff");
 document.body.appendChild(renderer.domElement);
 
 //Table ####################################################################################################
@@ -170,8 +167,35 @@ turnTable.add(vinyl);
 
 //obitControls ####################################################################################################
 /* const controls = new OrbitControls(camera, renderer.domElement);
-
 scene.add(controls); */
+
+//DRAG CONTROLS ###################################################################################################
+const dragObjects = [rateNob, volumeNob];
+const dragControls = new DragControls(dragObjects, camera, renderer.domElement);
+
+const playRate = 1;
+const playVolume = 1;
+
+Audio.audio1.volume = playVolume;
+Audio.audio1.playbackRate = playRate;
+
+dragControls.addEventListener("dragstart", function (event) {
+  console.log("começa drag");
+  console.log(event.object);
+});
+
+dragControls.addEventListener("drag", function (event) {
+  event.object.position.y = 0.05;
+  event.object.position.x = 0;
+  if (event.object.position.z > 0.4) event.object.position.z = 0.4;
+  if (event.object.position.z < -0.4) event.object.position.z = -0.4;
+});
+
+dragControls.addEventListener("dragend", function (event) {
+  if (event.object.position.z < 0.1 && event.object.position.z > -0.1)
+    event.object.position.z = 0;
+  console.log(event.object.position.z.toFixed(2));
+});
 
 let needleTarget = -0.8;
 let needleReached = false;
@@ -183,9 +207,9 @@ renderer.setAnimationLoop(animate);
 
 const raycaster = new THREE.Raycaster();
 
-document.addEventListener("click", onWheelEvent);
+document.addEventListener("click", onClickEvent);
 
-function onWheelEvent(event) {
+function onClickEvent(event) {
   const coords = new THREE.Vector2(
     (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
     -((event.clientY / renderer.domElement.clientHeight) * 2 - 1)
@@ -239,7 +263,6 @@ function animate() {
       needlePivot.rotation.y -= 0.02;
     } else {
       needleReached = false;
-
       needleTarget = -0.8;
     }
 

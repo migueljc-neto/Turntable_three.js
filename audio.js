@@ -9,10 +9,6 @@ export let audio1 = new Audio(
 );
 
 //playButton.addEventListener("click", playAudio);
-pauseButton.addEventListener("click", pauseAudio);
-timeButton.addEventListener("click", getTime);
-resetButton.addEventListener("click", resetTime);
-slowButton.addEventListener("click", slowAudio);
 
 export function playAudio() {
   console.log("play audio");

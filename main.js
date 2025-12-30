@@ -238,6 +238,8 @@ function resetTrack() {
   isPlaying = false;
   resetTrackFlag = true;
   Audio.resetTime();
+  Audio.audio1.volume = 0.5;
+  Audio.audio1.playbackRate = 1;
   console.log(resetTrackFlag);
 }
 
@@ -273,9 +275,24 @@ function animate() {
     }
 
     if (!needleReached && resetTrackFlag) {
+      if (volumeNob.position.z != 0) {
+        if (volumeNob.position.z > 0) volumeNob.position.z -= 0.01;
+        else volumeNob.position.z += 0.01;
+      }
+
+      if (rateNob.position.z != 0) {
+        if (rateNob.position.z > 0) rateNob.position.z -= 0.01;
+        else rateNob.position.z += 0.01;
+      }
       if (vinyl.rotation.z.toFixed(4) > Math.PI.toFixed(4)) {
         vinyl.rotation.z -= 0.08;
-      } else {
+      }
+
+      if (
+        volumeNob.position.z == 0 &&
+        rateNob.position.z == 0 &&
+        vinyl.rotation.z.toFixed(4) == Math.PI.toFixed(4)
+      ) {
         resetTrackFlag = false;
       }
     }

@@ -7,6 +7,7 @@ import * as Audio from "./audio.js";
 window.addEventListener("load", () => {
   Audio.audio1.volume = 0.5;
   Audio.audio1.playbackRate = 1;
+  setVinylSpeed(0.05);
 });
 
 //SCENE ####################################################################################################
@@ -200,6 +201,9 @@ dragControls.addEventListener("dragend", function (event) {
   const name = event.object.name;
 
   Helper.nobHandler(value, name);
+
+  console.log("rate:", Audio.audio1.playbackRate);
+  console.log("speed", vinylSpeed);
 });
 
 let needleTarget = -0.8;
@@ -208,6 +212,10 @@ let isPlaying = false;
 let audioPaused = false;
 let resetTrackFlag = false;
 let vinylSpeed;
+
+export function setVinylSpeed(v) {
+  vinylSpeed = v;
+}
 
 renderer.setAnimationLoop(animate);
 
@@ -240,7 +248,6 @@ function resetTrack() {
   Audio.resetTime();
   Audio.audio1.volume = 0.5;
   Audio.audio1.playbackRate = 1;
-  console.log(resetTrackFlag);
 }
 
 function animate() {
@@ -257,7 +264,7 @@ function animate() {
         needleReached = true;
         needleTarget = -1.6;
       }
-      vinyl.rotation.z += 0.02;
+      vinyl.rotation.z += vinylSpeed;
     }
   }
 
@@ -284,6 +291,7 @@ function animate() {
         if (rateNob.position.z > 0) rateNob.position.z -= 0.01;
         else rateNob.position.z += 0.01;
       }
+
       if (vinyl.rotation.z.toFixed(4) > Math.PI.toFixed(4)) {
         vinyl.rotation.z -= 0.08;
       }
@@ -300,9 +308,3 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
-//teste funçoes
-
-window.addEventListener("wheel", function (e) {
-  const delta = e.deltaY;
-});

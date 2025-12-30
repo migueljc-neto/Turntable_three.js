@@ -6,6 +6,7 @@ import * as Audio from "./audio.js";
 
 window.addEventListener("load", () => {
   Audio.audio1.volume = 0.5;
+  Audio.audio1.playbackRate = 1;
 });
 
 //SCENE ####################################################################################################
@@ -186,16 +187,19 @@ dragControls.addEventListener("drag", function (event) {
   if (event.object.position.z < -0.4) event.object.position.z = -0.4;
 
   const value = -event.object.position.z.toFixed(1);
+  const name = event.object.name;
 
-  if (event.object.name == "vNob") {
-    Helper.volumeSwitch(value);
-  } else {
-  }
+  Helper.nobHandler(value, name);
 });
 
 dragControls.addEventListener("dragend", function (event) {
   if (event.object.position.z < 0.1 && event.object.position.z > -0.1)
     event.object.position.z = 0;
+
+  const value = -event.object.position.z.toFixed(1);
+  const name = event.object.name;
+
+  Helper.nobHandler(value, name);
 });
 
 let needleTarget = -0.8;
@@ -203,6 +207,7 @@ let needleReached = false;
 let isPlaying = false;
 let audioPaused = false;
 let resetTrackFlag = false;
+let vinylSpeed;
 
 renderer.setAnimationLoop(animate);
 

@@ -13,6 +13,7 @@ export let audio1 = new Audio(
 export function playAudio() {
   console.log("play audio");
   audio1.play();
+  console.log(audio1.volume);
 }
 export function pauseAudio() {
   console.log("pause audio");

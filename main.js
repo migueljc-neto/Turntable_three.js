@@ -4,12 +4,16 @@ import { DragControls } from "three/addons/controls/DragControls.js";
 import * as Helper from "./helperFunctions.js";
 import * as Audio from "./audio.js";
 
+window.addEventListener("load", () => {
+  Audio.audio1.volume = 0.5;
+});
+
 //SCENE ####################################################################################################
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
-  75, //abertura de lente
-  window.innerWidth / window.innerHeight, //racio
+  75,
+  window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
@@ -102,10 +106,12 @@ const nobMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
 const volumeNob = new THREE.Mesh(nobGeo, nobMat);
 volumeSlider.add(volumeNob);
+volumeNob.name = "vNob";
 volumeNob.position.set(0, 0.05, 0);
 
 const rateNob = new THREE.Mesh(nobGeo, nobMat);
 rateSlider.add(rateNob);
+rateNob.name = "rNob";
 rateNob.position.set(0, 0.05, 0);
 
 //PLATE ####################################################################################################
@@ -173,28 +179,23 @@ scene.add(controls); */
 const dragObjects = [rateNob, volumeNob];
 const dragControls = new DragControls(dragObjects, camera, renderer.domElement);
 
-const playRate = 1;
-const playVolume = 1;
-
-Audio.audio1.volume = playVolume;
-Audio.audio1.playbackRate = playRate;
-
-dragControls.addEventListener("dragstart", function (event) {
-  console.log("começa drag");
-  console.log(event.object);
-});
-
 dragControls.addEventListener("drag", function (event) {
   event.object.position.y = 0.05;
   event.object.position.x = 0;
   if (event.object.position.z > 0.4) event.object.position.z = 0.4;
   if (event.object.position.z < -0.4) event.object.position.z = -0.4;
+
+  const value = -event.object.position.z.toFixed(1);
+
+  if (event.object.name == "vNob") {
+    Helper.volumeSwitch(value);
+  } else {
+  }
 });
 
 dragControls.addEventListener("dragend", function (event) {
   if (event.object.position.z < 0.1 && event.object.position.z > -0.1)
     event.object.position.z = 0;
-  console.log(event.object.position.z.toFixed(2));
 });
 
 let needleTarget = -0.8;

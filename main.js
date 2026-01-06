@@ -292,14 +292,14 @@ function animate() {
         else rateNob.position.z += 0.01;
       }
 
-      if (vinyl.rotation.z.toFixed(4) > Math.PI.toFixed(4)) {
+      if (vinyl.rotation.z.toFixed(1) > Math.PI.toFixed(1)) {
         vinyl.rotation.z -= 0.08;
       }
 
       if (
         volumeNob.position.z == 0 &&
         rateNob.position.z == 0 &&
-        vinyl.rotation.z.toFixed(4) == Math.PI.toFixed(4)
+        vinyl.rotation.z.toFixed(1) == Math.PI.toFixed(1)
       ) {
         resetTrackFlag = false;
       }

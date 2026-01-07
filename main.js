@@ -216,12 +216,57 @@ let vinylSpeed;
 export function setVinylSpeed(v) {
   vinylSpeed = v;
 }
+let isWheeling = false;
+let wheelTimeout;
+let startSpeed;
+let speedReached = false;
 
 renderer.setAnimationLoop(animate);
 
 const raycaster = new THREE.Raycaster();
 
 document.addEventListener("click", onClickEvent);
+
+window.addEventListener(
+  "wheel",
+  (event) => {
+    if (!isWheeling) {
+      startSpeed = vinylSpeed;
+      console.log("Wheel Start ");
+      isWheeling = true;
+    }
+
+    let dinamycSpeed = -event.deltaY * 0.01;
+
+    console.log(
+      /* dinamycSpeed < startSpeed,
+      "start speed:",
+      startSpeed, */
+      "dinamyc speed:",
+      dinamycSpeed
+    );
+
+    if (dinamycSpeed < startSpeed && !speedReached) {
+      speedReached = true;
+      setVinylSpeed(startSpeed);
+      console.log("test");
+
+      event.stopPropagation();
+    } else {
+      setVinylSpeed(dinamycSpeed);
+    }
+
+    clearTimeout(wheelTimeout);
+
+    wheelTimeout = setTimeout(() => {
+      console.log("Wheel End");
+      speedReached = false;
+      isWheeling = false;
+      setVinylSpeed(startSpeed);
+    }, 200);
+  },
+  { passive: true }
+);
 
 function onClickEvent(event) {
   const coords = new THREE.Vector2(
@@ -248,6 +293,7 @@ function resetTrack() {
   Audio.resetTime();
   Audio.audio1.volume = 0.5;
   Audio.audio1.playbackRate = 1;
+  setVinylSpeed(0.05);
 }
 
 function animate() {

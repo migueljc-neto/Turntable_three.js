@@ -220,6 +220,8 @@ let isWheeling = false;
 let wheelTimeout;
 let startSpeed;
 let speedReached = false;
+let elapsedTime;
+let audioTime;
 
 renderer.setAnimationLoop(animate);
 
@@ -232,36 +234,40 @@ window.addEventListener(
   (event) => {
     if (!isWheeling) {
       startSpeed = vinylSpeed;
-      console.log("Wheel Start ");
+      console.log("Wheel Start");
       isWheeling = true;
+      audioTime = Audio.getTime();
+      console.log(audioTime);
+      elapsedTime = 0;
     }
+    elapsedTime += 0.01;
+    let dinamycSpeed = -event.deltaY * 0.003;
 
-    let dinamycSpeed = -event.deltaY * 0.01;
-
-    console.log(
-      /* dinamycSpeed < startSpeed,
-      "start speed:",
-      startSpeed, */
-      "dinamyc speed:",
-      dinamycSpeed
-    );
-
+    //if dynamic < start skip iteration
+    //if = or > setVinylSpeed(dinamycSpeed)
     if (dinamycSpeed < startSpeed && !speedReached) {
       speedReached = true;
       setVinylSpeed(startSpeed);
-      console.log("test");
-
-      event.stopPropagation();
     } else {
       setVinylSpeed(dinamycSpeed);
     }
 
+    /* console.log(
+      dinamycSpeed.toFixed(2) === startSpeed,
+      event.deltaY.toFixed(2),
+      startSpeed,
+      event.deltaMode
+    ); */
+
     clearTimeout(wheelTimeout);
 
     wheelTimeout = setTimeout(() => {
+      //START TIME + ELAPSED TIME
       console.log("Wheel End");
       speedReached = false;
       isWheeling = false;
+      console.log(Audio.getTime() - audioTime, "elapsed ", elapsedTime);
+
       setVinylSpeed(startSpeed);
     }, 200);
   },

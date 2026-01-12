@@ -19,9 +19,8 @@ export function pauseAudio() {
   console.log("pause audio");
   audio1.pause();
 }
-function getTime() {
-  console.log("get time");
-  console.log(audio1.currentTime);
+export function getTime() {
+  return audio1.currentTime;
 }
 
 export function resetTime() {

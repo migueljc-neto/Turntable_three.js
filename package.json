@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "gsap": "^3.14.1"
+    "gsap": "^3.14.1",
+    "normalize-wheel": "^1.0.1"
   }
 }

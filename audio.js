@@ -1,19 +1,37 @@
-const playButton = document.getElementById("buttonPlay");
-const pauseButton = document.getElementById("buttonPause");
-const timeButton = document.getElementById("buttonTime");
-const resetButton = document.getElementById("buttonReset");
-const slowButton = document.getElementById("buttonSlow");
+let source;
 
 export let audio1 = new Audio(
   "./src/Injury Reserve - Jailbreak the Tesla (Feat. Aminé).mp3"
 );
 
-//playButton.addEventListener("click", playAudio);
+export let backwardScratch = new Audio("./src/scratch.mp3");
+export let forwardScratch = new Audio("./src/scratch.mp3");
+
+export function playScratch(direction) {
+  if (forwardScratch.isPlaying) forwardScratch.pause();
+  if (backwardScratch.isPlaying) backwardScratch.pause();
+
+  if (direction === "forward") {
+    forwardScratch.play();
+  } else {
+    backwardScratch.play();
+  }
+}
+
+export function stopScratch() {
+  if (!forwardScratch.paused) {
+    forwardScratch.pause();
+    forwardScratch.currentTime = 0;
+  }
+  if (!backwardScratch.paused) {
+    backwardScratch.pause();
+    backwardScratch.currentTime = 0;
+  }
+}
 
 export function playAudio() {
   console.log("play audio");
   audio1.play();
-  console.log(audio1.volume);
 }
 export function pauseAudio() {
   console.log("pause audio");
@@ -23,11 +41,9 @@ export function getTime() {
   return audio1.currentTime;
 }
 
+export function setTime(stamp) {
+  audio1.currentTime = stamp;
+}
 export function resetTime() {
   audio1.currentTime = 0;
-}
-
-function slowAudio() {
-  console.log("slow down");
-  audio1.playbackRate = -1;
 }

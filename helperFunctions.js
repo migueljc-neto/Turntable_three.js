@@ -1,5 +1,7 @@
 import * as Audio from "./audio.js";
 import { setVinylSpeed } from "./main.js";
+import * as THREE from "three";
+const textLoader = new THREE.TextureLoader();
 
 export function volumeSwitch(value) {
   switch (value) {
@@ -93,10 +95,35 @@ export function rateSwitch(value) {
   setVinylSpeed(speed);
 }
 
+export function checkCamera(posObj, target) {}
+
 export function nobHandler(value, objName) {
   if (objName == "vNob") {
     volumeSwitch(value);
   } else {
     rateSwitch(value);
   }
+}
+
+export function buttonMaterials(button) {
+  return [
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load("./src/buttons/right.png"),
+    }),
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load("./src/buttons/left.png"),
+    }),
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load(`./src/buttons/top${button}.png`),
+    }),
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load("./src/buttons/bottom.png"),
+    }),
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load("./src/buttons/front.png"),
+    }),
+    new THREE.MeshStandardMaterial({
+      map: textLoader.load("./src/buttons/back.png"),
+    }),
+  ];
 }

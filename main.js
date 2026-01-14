@@ -4,14 +4,12 @@ import { DragControls } from "three/addons/controls/DragControls.js";
 import * as Helper from "./helperFunctions.js";
 import * as Audio from "./audio.js";
 
-let moveCamera = false;
-
-const moveCamBtn = document.getElementById("moveBtn");
-moveCamBtn.addEventListener("click", () => (moveCamera = true));
 window.addEventListener("load", () => {
   Audio.audio1.volume = 0.5;
   Audio.audio1.playbackRate = 1;
   setVinylSpeed(0.05);
+  console.log(Audio.audio1.paused);
+  console.log(0xffff00 - 0xfff610);
 });
 
 //SCENE ####################################################################################################
@@ -26,10 +24,10 @@ const camera = new THREE.PerspectiveCamera(
 
 //HELPER
 const textLoader = new THREE.TextureLoader();
-const axesHelper = new THREE.AxesHelper(5);
+/* const axesHelper = new THREE.AxesHelper(5);
 const gridHelper = new THREE.GridHelper(5);
 scene.add(axesHelper);
-scene.add(gridHelper);
+scene.add(gridHelper); */
 
 camera.position.set(0, 5.5, 3);
 camera.rotation.x = 5.8;
@@ -67,7 +65,9 @@ const mainLightPosition = [
   [-9, 8, 9],
 ];
 
-for (let i = 0; i < 4; i++) {
+const lights = [];
+
+for (let i = 0; i < 3; i++) {
   let light = new THREE.PointLight(0xffff00, 30);
   light.position.set(...mainLightPosition[i]);
   light.castShadow = true;
@@ -76,6 +76,13 @@ for (let i = 0; i < 4; i++) {
   light.shadow.mapSize.height = 1024;
 
   scene.add(light);
+  lights.push(light);
+}
+
+function setLightColor(value) {
+  lights.forEach((item) => {
+    item.color.set(value);
+  });
 }
 
 const underLightL = new THREE.PointLight(0x7e111a, 10);
@@ -86,13 +93,22 @@ underLightL.shadow.mapSize.width = 1024;
 underLightL.shadow.mapSize.height = 1024;
 
 scene.add(underLightL);
+
+const cellLight = new THREE.PointLight(0xffff00, 2);
+cellLight.position.set(0, 5, 0);
+cellLight.castShadow = true;
+
+cellLight.shadow.mapSize.width = 1024;
+cellLight.shadow.mapSize.height = 1024;
+
+scene.add(cellLight);
 //Table ####################################################################################################
 const tableTexture = textLoader.load(`./src/tableTexture.png`);
 
 const tableGeometry = new THREE.BoxGeometry(8, 4, 4);
 const tableMaterial = new THREE.MeshStandardMaterial({
   color: 0x8787a8,
-  roughness: 1,
+  roughness: 0.7,
   metalness: 0,
   map: tableTexture,
   wireframe: false,
@@ -103,19 +119,52 @@ table.position.set(0, 0.5, 0);
 scene.add(table);
 
 //TURNTABLE ####################################################################################################
+const turntableTexture = [
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntableBase.png"),
+  }),
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntableBase.png"),
+  }),
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntable.png"),
+  }),
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntableBase.png"),
+  }),
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntableBase.png"),
+  }),
+  new THREE.MeshStandardMaterial({
+    map: textLoader.load("./src/turntable/turntableBase.png"),
+  }),
+];
+
 const turnTableGeometry = new THREE.BoxGeometry(5, 0.2, 2.5);
-const turnTableMaterial = new THREE.MeshNormalMaterial({
-  side: THREE.DoubleSide,
-  wireframe: false,
-});
-const turnTable = new THREE.Mesh(turnTableGeometry, turnTableMaterial);
+
+const turnTable = new THREE.Mesh(turnTableGeometry, turntableTexture);
 turnTable.position.set(0, 2.6, 0);
 
 scene.add(turnTable);
 
+//OnLight ####################################################################################################
+const capsuleGeo = new THREE.CapsuleGeometry(0.05, 0.1, 4, 8, 1);
+const capsuleMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const capsule = new THREE.Mesh(capsuleGeo, capsuleMat);
+capsule.position.set(2, 0.1, 0.9);
+turnTable.add(capsule);
+
+const tableLight = new THREE.PointLight(0x519733, 0);
+tableLight.position.set(2, 0.3, 0.9);
+tableLight.castShadow = true;
+
+tableLight.shadow.mapSize.width = 1024;
+tableLight.shadow.mapSize.height = 1024;
+
+turnTable.add(tableLight);
+
 //BUTTON ####################################################################################################
 const buttonGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-const buttonMat = new THREE.MeshNormalMaterial();
 
 // PLAY BUTTON
 const playButton = new THREE.Mesh(buttonGeo, Helper.buttonMaterials("Play"));
@@ -134,6 +183,18 @@ const resetButton = new THREE.Mesh(buttonGeo, Helper.buttonMaterials("Reset"));
 turnTable.add(resetButton);
 resetButton.name = "resetB";
 resetButton.position.set(1.5, 0.1, 0.9);
+
+// NEXT BUTTON
+const nextButton = new THREE.Mesh(buttonGeo, Helper.buttonMaterials("Next"));
+turnTable.add(nextButton);
+nextButton.name = "nextB";
+nextButton.position.set(1.3, 0.1, 0.5);
+
+// PREV BUTTON
+const prevButton = new THREE.Mesh(buttonGeo, Helper.buttonMaterials("Prev"));
+turnTable.add(prevButton);
+prevButton.name = "prevB";
+prevButton.position.set(0.9, 0.1, 0.5);
 
 //SLIDERS ####################################################################################################
 const sliderGeo = new THREE.BoxGeometry(0.3, 0.2, 1);
@@ -162,7 +223,7 @@ const sliderMaterials = [
 
 const sliders = new THREE.Group();
 turnTable.add(sliders);
-sliders.position.set(1.4, 0.1, 0);
+sliders.position.set(1.4, 0.1, -0.4);
 
 // VOLUME SLIDER
 const volumeSlider = new THREE.Mesh(sliderGeo, sliderMaterials);
@@ -177,8 +238,8 @@ rateSlider.name = "rateS";
 rateSlider.position.set(0, 0, 0);
 
 //SLIDERS NOBS ####################################################################################################
-const nobGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.2, 32);
-const nobMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const nobGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.2, 32);
+const nobMat = new THREE.MeshStandardMaterial({ color: 0x941c2f });
 
 const volumeNob = new THREE.Mesh(nobGeo, nobMat);
 volumeSlider.add(volumeNob);
@@ -192,10 +253,11 @@ rateNob.position.set(0, 0.05, 0);
 
 //PLATE ####################################################################################################
 const plateGeometry = new THREE.CylinderGeometry(1.1, 1.2, 0.2);
-const plateMaterial = new THREE.MeshBasicMaterial({
-  color: 0xd4d8d8,
-  reflectivity: 1,
+
+const plateMaterial = new THREE.MeshStandardMaterial({
+  map: textLoader.load("./src/turntable/turntable.png"),
 });
+
 const plate = new THREE.Mesh(plateGeometry, plateMaterial);
 plate.position.set(-1, 0.04, 0);
 
@@ -215,14 +277,18 @@ const points = [
 const path = new THREE.CatmullRomCurve3(points);
 
 const tubeGeo = new THREE.TubeGeometry(path, 64, 0.05, 20, false);
-const tubeMat = new THREE.MeshStandardMaterial({ color: 0x2194ce });
+const tubeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
 const tubeObj = new THREE.Mesh(tubeGeo, tubeMat);
 
 needlePivot.add(tubeObj);
 needlePivot.rotation.y = -1.6;
 
 const needleGeo = new THREE.SphereGeometry(0.08, 32);
-const needleMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const needleMat = new THREE.MeshStandardMaterial({
+  color: 0x999999,
+  roughness: 0,
+  metalness: 1,
+});
 const needleObj = new THREE.Mesh(needleGeo, needleMat);
 
 needlePivot.add(needleObj);
@@ -230,11 +296,49 @@ needlePivot.add(needleObj);
 needleObj.position.set(0.85, 0, 0);
 
 //Vinyl  ####################################################################################################
-const vinylTexture = textLoader.load(`./src/vinylCover.png`);
+let isTrackChanging = false;
+let trackChanged = false;
+let direction = "next";
+let currTrack = 0;
+
+let trackCover = "./src/covers/ir.png";
+
+function changeTrack(step) {
+  isTrackChanging = true;
+  direction = step;
+}
+
+function setAudioSource(index) {
+  Audio.audio1.src = tracks[index].s;
+}
+
+function setCover(index) {
+  trackCover = tracks[index].c;
+  textLoader.load(trackCover, (texture) => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    vinyl.material.map = texture;
+  });
+}
+let tracks = [
+  {
+    c: "./src/covers/ir.png",
+    s: "./src/tracks/IR -JTT.mp3",
+  },
+  {
+    c: "./src/covers/bs.png",
+    s: "./src/tracks/BS -WP.mp3",
+  },
+  {
+    c: "./src/covers/yl.png",
+    s: "./src/tracks/YL -A.mp3",
+  },
+];
+
+let vinylTexture = textLoader.load("./src/covers/ir.png");
 vinylTexture.colorSpace = THREE.SRGBColorSpace;
 
 const vinylGeometry = new THREE.CircleGeometry(1.1, 100);
-const vinylMaterial = new THREE.MeshBasicMaterial({
+const vinylMaterial = new THREE.MeshStandardMaterial({
   map: vinylTexture,
   side: THREE.DoubleSide,
 });
@@ -359,6 +463,10 @@ function onClickEvent(event) {
     }
     if (selectedObject.name === "pauseB") isPlaying = false;
     if (selectedObject.name === "resetB") resetTrack();
+    if (selectedObject.name === "prevB" && Audio.audio1.paused)
+      changeTrack("prev");
+    if (selectedObject.name === "nextB" && Audio.audio1.paused)
+      changeTrack("next");
   }
 }
 
@@ -374,8 +482,6 @@ function resetTrack() {
   Audio.audio1.playbackRate = 1;
   setVinylSpeed(0.05);
 }
-let cameraTarget = { x: 0, y: 8, z: 2 };
-let direction = "+";
 
 let needleTarget = -0.8;
 let needleReached = false;
@@ -385,48 +491,6 @@ let resetTrackFlag = false;
 let vinylSpeed;
 
 function animate() {
-  if (moveCamera) {
-    let posX = camera.position.x.toFixed(2);
-    let posY = camera.position.y.toFixed(2);
-    let posZ = camera.position.z.toFixed(2);
-
-    if (direction === "+") {
-      if (posX != cameraTarget.x) {
-        camera.position.x += 0.1;
-      }
-      if (posY != cameraTarget.y) {
-        camera.position.y += 0.1;
-      }
-      if (posZ != cameraTarget.z) {
-        camera.position.z += 0.1;
-      }
-    }
-
-    if (direction === "-") {
-      if (posX != cameraTarget.x) {
-        camera.position.x -= 0.1;
-      }
-      if (posY != cameraTarget.y) {
-        camera.position.y -= 0.1;
-      }
-      if (posZ != cameraTarget.z) {
-        camera.position.z -= 0.1;
-      }
-    }
-
-    if (
-      posX == cameraTarget.x &&
-      posZ == cameraTarget.z &&
-      posY == cameraTarget.y
-    ) {
-      moveCamera = false;
-      cameraTarget =
-        direction == "+" ? { x: 0, y: 6, z: 2 } : { x: 0, y: 8, z: 2 };
-      direction = direction == "+" ? "-" : "+";
-      console.log(direction, cameraTarget, camera.position);
-    }
-  }
-
   if (vinyl.rotation.z > 3 * Math.PI) vinyl.rotation.z = Math.PI;
 
   if (isPlaying) {
@@ -485,5 +549,43 @@ function animate() {
     }
   }
 
+  if (isTrackChanging) {
+    vinyl.rotation.z += 2;
+    if (!trackChanged) {
+      if (direction === "next") {
+        currTrack = currTrack == 2 ? 0 : currTrack + 1;
+      } else {
+        currTrack = currTrack == 0 ? 2 : currTrack - 1;
+      }
+      setAudioSource(currTrack);
+      setCover(currTrack);
+      trackChanged = true;
+      switch (currTrack) {
+        case 0:
+          setLightColor(0xffff00);
+          break;
+        case 1:
+          setLightColor(0x4a314d);
+          break;
+        case 2:
+          setLightColor(0xa70000);
+          break;
+      }
+    }
+    setTimeout(() => {
+      console.log("Changed");
+      vinyl.rotation.z = Math.PI;
+      isTrackChanging = false;
+      trackChanged = false;
+    }, 200);
+  }
+
+  if (!Audio.audio1.paused) {
+    capsuleMat.color.set(0x00ff00);
+    tableLight.intensity = 0.1;
+  } else {
+    capsuleMat.color.set(0x000000);
+    tableLight.intensity = 0;
+  }
   renderer.render(scene, camera);
 }

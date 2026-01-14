@@ -1,8 +1,13 @@
-let source;
+import * as main from "./main.js";
 
-export let audio1 = new Audio(
-  "./src/Injury Reserve - Jailbreak the Tesla (Feat. Aminé).mp3"
-);
+let currSource = "./src/tracks/IR -JTT.mp3";
+let tracks = [
+  "./src/tracks/IR -JTT.mp3",
+  "./src/tracks/BS -WP.mp3",
+  "./src/tracks/YL -A.mp3",
+];
+
+export let audio1 = new Audio(currSource);
 
 export let backwardScratch = new Audio("./src/scratch.mp3");
 export let forwardScratch = new Audio("./src/scratch.mp3");
@@ -32,6 +37,7 @@ export function stopScratch() {
 export function playAudio() {
   console.log("play audio");
   audio1.play();
+  console.log(audio1.isPlaying);
 }
 export function pauseAudio() {
   console.log("pause audio");

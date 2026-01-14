@@ -9,8 +9,8 @@ let tracks = [
 
 export let audio1 = new Audio(currSource);
 
-export let backwardScratch = new Audio("./src/scratch.mp3");
-export let forwardScratch = new Audio("./src/scratch.mp3");
+export let backwardScratch = new Audio("./src/tracks/scratch.mp3");
+export let forwardScratch = new Audio("./src/tracks/scratch.mp3");
 
 export function playScratch(direction) {
   if (forwardScratch.isPlaying) forwardScratch.pause();

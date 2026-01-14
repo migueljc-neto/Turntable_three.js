@@ -403,6 +403,7 @@ window.addEventListener(
         Audio.playScratch("forward");
       } else {
         endTime = startTime - 2 < 0 ? 0 : startTime - 2;
+        console.log(endTime);
         Audio.playScratch("backward");
       }
       Audio.audio1.volume = 0;

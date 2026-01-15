@@ -68,7 +68,7 @@ const mainLightPosition = [
 const lights = [];
 
 for (let i = 0; i < 3; i++) {
-  let light = new THREE.PointLight(0xffff00, 30);
+  let light = new THREE.PointLight(0xffff00, 50);
   light.position.set(...mainLightPosition[i]);
   light.castShadow = true;
 
@@ -551,7 +551,9 @@ function animate() {
   }
 
   if (isTrackChanging) {
-    vinyl.rotation.z += 2;
+    direction === "next"
+      ? (vinyl.rotation.z += 1.5)
+      : (vinyl.rotation.z -= 1.5);
     if (!trackChanged) {
       if (direction === "next") {
         currTrack = currTrack == 2 ? 0 : currTrack + 1;
@@ -566,7 +568,7 @@ function animate() {
           setLightColor(0xffff00);
           break;
         case 1:
-          setLightColor(0x4a314d);
+          setLightColor(0x822e6d);
           break;
         case 2:
           setLightColor(0xa70000);
